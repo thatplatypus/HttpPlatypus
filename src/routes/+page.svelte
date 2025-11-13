@@ -156,7 +156,7 @@
 				<div class="relative w-full h-full">
 					{#if !hasImageError(statusCode.statusCode)}
 						<img
-							src={getImagePath(statusCode.statusCode)}
+							data-src={getImagePath(statusCode.statusCode)}
 							alt="{statusCode.statusCode} - {statusCode.name}"
 							onerror={() => handleImageError(statusCode.statusCode)}
 							class="w-full h-full object-cover lozad"
@@ -200,7 +200,7 @@
 				<div class="relative w-full aspect-square max-w-2xl mx-auto rounded-lg overflow-hidden border bg-muted">
 					{#if selectedStatusCode && !hasImageError(selectedStatusCode.statusCode)}
 						<img
-							src={getImagePath(selectedStatusCode.statusCode)}
+							data-src={getImagePath(selectedStatusCode.statusCode)}
 							alt="{selectedStatusCode.statusCode} - {selectedStatusCode.name}"
 							onerror={() => selectedStatusCode && handleImageError(selectedStatusCode.statusCode)}
 							class="w-full h-full object-contain lozad"
