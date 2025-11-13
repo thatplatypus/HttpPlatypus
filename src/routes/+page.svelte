@@ -5,6 +5,7 @@
 	import ExternalLinkIcon from '@lucide/svelte/icons/external-link';
 	import SunIcon from '@lucide/svelte/icons/sun';
 	import MoonIcon from '@lucide/svelte/icons/moon';
+	import lozad from 'lozad';
 
 	interface StatusCode {
 		statusCode: number;
@@ -15,6 +16,9 @@
 	interface StatusCodesData {
 		statusCodes: StatusCode[];
 	}
+
+	const observer = lozad();
+	observer.observe();
 
 	let statusCodes = $state<StatusCode[]>([]);
 	let selectedStatusCode = $state<StatusCode | null>(null);
@@ -155,7 +159,7 @@
 							src={getImagePath(statusCode.statusCode)}
 							alt="{statusCode.statusCode} - {statusCode.name}"
 							onerror={() => handleImageError(statusCode.statusCode)}
-							class="w-full h-full object-cover"
+							class="w-full h-full object-cover lozad"
 						/>
 					{/if}
 					{#if hasImageError(statusCode.statusCode)}
@@ -199,7 +203,7 @@
 							src={getImagePath(selectedStatusCode.statusCode)}
 							alt="{selectedStatusCode.statusCode} - {selectedStatusCode.name}"
 							onerror={() => selectedStatusCode && handleImageError(selectedStatusCode.statusCode)}
-							class="w-full h-full object-contain"
+							class="w-full h-full object-contain lozad"
 						/>
 					{/if}
 					{#if selectedStatusCode && hasImageError(selectedStatusCode.statusCode)}

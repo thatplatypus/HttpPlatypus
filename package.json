@@ -33,6 +33,7 @@
 		"vite": "^7.1.10"
 	},
 	"dependencies": {
+		"lozad": "^1.16.0",
 		"lucide-svelte": "^0.552.0"
 	}
 }
