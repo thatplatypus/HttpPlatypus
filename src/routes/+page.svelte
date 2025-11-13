@@ -116,7 +116,7 @@
 
 	tick().then(() => {
       try {
-        const observer = lozad();
+        let observer = lozad();
         observer.observe();
       } catch (error) {
         console.error("Failed to initialize lozad:", error);
@@ -198,6 +198,7 @@
         <div class="relative w-full h-full">
           {#if !hasImageError(statusCode.statusCode)}
             <img
+			  src={getImagePath(statusCode.statusCode)}
               data-src={getImagePath(statusCode.statusCode)}
               alt="{statusCode.statusCode} - {statusCode.name}"
               onerror={() => handleImageError(statusCode.statusCode)}
