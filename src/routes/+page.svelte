@@ -7,6 +7,8 @@
   import MoonIcon from "@lucide/svelte/icons/moon";
   import lozad from "lozad";
 
+  let lozadObserver: ReturnType<typeof lozad> | null = null;
+
   interface StatusCode {
     statusCode: number;
     name: string;
@@ -31,15 +33,6 @@
     if (statusCode >= 400 && statusCode < 500) return "4xx";
     if (statusCode >= 500) return "5xx";
     return "";
-  }
-
-  function getFilteredStatusCodes(): StatusCode[] {
-    const validGroups = ["1xx", "2xx", "3xx", "4xx", "5xx"];
-    if (!selectedGroup || !validGroups.includes(selectedGroup))
-      return statusCodes;
-    return statusCodes.filter(
-      (code) => getStatusCodeGroup(code.statusCode) === selectedGroup
-    );
   }
 
   function toggleTheme() {
@@ -114,14 +107,26 @@
       console.error("Failed to load status codes:", error);
     }
 
-	tick().then(() => {
+    tick().then(() => {
       try {
-        let observer = lozad();
-        observer.observe();
+        lozadObserver = lozad(".lozad", {
+          loaded: function (el: Element) {
+            el.classList.add("loaded");
+          },
+        });
+        lozadObserver.observe();
       } catch (error) {
         console.error("Failed to initialize lozad:", error);
       }
     });
+  });
+
+  $effect(() => {
+    if (dialogOpen && lozadObserver) {
+      tick().then(() => {
+        lozadObserver?.observe();
+      });
+    }
   });
 </script>
 
@@ -190,35 +195,31 @@
   <div
     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
   >
-    {#each getFilteredStatusCodes() as statusCode}
+    {#each statusCodes as statusCode}
+      {@const isFiltered = selectedGroup && getStatusCodeGroup(statusCode.statusCode) !== selectedGroup}
       <button
         onclick={() => openDialog(statusCode)}
-        class="group relative aspect-square overflow-hidden rounded-lg border bg-card hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer"
+        class="group relative aspect-square overflow-hidden rounded-lg border bg-card hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer {isFiltered ? 'hidden' : ''}"
       >
         <div class="relative w-full h-full">
-          {#if !hasImageError(statusCode.statusCode)}
-            <img
-			  src={getImagePath(statusCode.statusCode)}
-              data-src={getImagePath(statusCode.statusCode)}
-              alt="{statusCode.statusCode} - {statusCode.name}"
-              onerror={() => handleImageError(statusCode.statusCode)}
-              class="w-full h-full object-cover lozad"
-            />
-          {/if}
-          {#if hasImageError(statusCode.statusCode)}
-            <div
-              class="w-full h-full flex items-center justify-center {getStatusCodeColor(
-                statusCode.statusCode
-              )}"
-            >
-              <div class="text-center p-4">
-                <div class="text-4xl font-bold mb-2">
-                  {statusCode.statusCode}
-                </div>
-                <div class="text-sm font-medium">{statusCode.name}</div>
+          <img
+            data-src={getImagePath(statusCode.statusCode)}
+            alt="{statusCode.statusCode} - {statusCode.name}"
+            onerror={() => handleImageError(statusCode.statusCode)}
+            class="w-full h-full object-cover lozad {hasImageError(statusCode.statusCode) ? 'hidden' : ''}"
+          />
+          <div
+            class="w-full h-full flex items-center justify-center {getStatusCodeColor(
+              statusCode.statusCode
+            )} {hasImageError(statusCode.statusCode) ? '' : 'hidden'}"
+          >
+            <div class="text-center p-4">
+              <div class="text-4xl font-bold mb-2">
+                {statusCode.statusCode}
               </div>
+              <div class="text-sm font-medium">{statusCode.name}</div>
             </div>
-          {/if}
+          </div>
           <div
             class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
           >
@@ -249,21 +250,19 @@
         <div
           class="relative w-full aspect-square max-w-2xl mx-auto rounded-lg overflow-hidden border bg-muted"
         >
-          {#if selectedStatusCode && !hasImageError(selectedStatusCode.statusCode)}
+          {#if selectedStatusCode}
             <img
               data-src={getImagePath(selectedStatusCode.statusCode)}
               alt="{selectedStatusCode.statusCode} - {selectedStatusCode.name}"
               onerror={() =>
                 selectedStatusCode &&
                 handleImageError(selectedStatusCode.statusCode)}
-              class="w-full h-full object-contain lozad"
+              class="w-full h-full object-contain lozad {hasImageError(selectedStatusCode.statusCode) ? 'hidden' : ''}"
             />
-          {/if}
-          {#if selectedStatusCode && hasImageError(selectedStatusCode.statusCode)}
             <div
               class="w-full h-full flex items-center justify-center {getStatusCodeColor(
                 selectedStatusCode.statusCode
-              )}"
+              )} {hasImageError(selectedStatusCode.statusCode) ? '' : 'hidden'}"
             >
               <div class="text-center p-8">
                 <div class="text-8xl font-bold mb-4">
